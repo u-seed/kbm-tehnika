@@ -1,0 +1,224 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0f3d5e">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Выход ТС">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>Выход ТС</title>
+<style>
+:root{
+  --bg:#f3f6f9; --card:#fff; --ink:#14212b; --muted:#667785; --line:#e1e8ee;
+  --brand:#0f3d5e; --brand2:#1c6aa3; --day:#fff3cf; --day-ink:#6b4e00; --night:#1b2a3a; --night-ink:#dbe7f3;
+  --ok:#1b7f4b; --bad:#c0392b;
+}
+@media (prefers-color-scheme:dark){
+  :root{--bg:#0d1620; --card:#152330; --ink:#e8eff5; --muted:#8fa3b3; --line:#243747;
+    --brand:#0f3d5e; --brand2:#4aa0dc; --day:#4a3c10; --day-ink:#ffe9a8; --night:#0a1118; --night-ink:#b9cde0;
+    --ok:#4cc38a; --bad:#ff7b6b}
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:15px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  padding-bottom:env(safe-area-inset-bottom)}
+header{background:var(--brand);color:#fff;padding:calc(env(safe-area-inset-top) + 12px) 16px 14px;position:sticky;top:0;z-index:5}
+.row{display:flex;align-items:center;justify-content:space-between;gap:8px}
+h1{font-size:18px;margin:0;font-weight:700}
+.date{font-size:13px;opacity:.85}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:10px}
+.kpi{background:rgba(255,255,255,.12);border-radius:10px;padding:7px 8px;text-align:center}
+.kpi b{display:block;font-size:19px;line-height:1.1;white-space:nowrap}.kpi:last-child b{font-size:15px;padding-top:3px}
+.kpi span{font-size:11px;opacity:.8}
+.kpi.neg b{color:#ffb4a8}
+.tabs{display:flex;gap:6px;margin-top:10px}
+.tab{flex:1;border:0;border-radius:9px;padding:8px;font:inherit;font-weight:600;background:rgba(255,255,255,.12);color:#fff}
+.tab.on{background:#fff;color:var(--brand)}
+main{padding:12px 12px 40px;max-width:760px;margin:0 auto}
+.search{width:100%;padding:11px 14px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--ink);font:inherit;margin-bottom:10px}
+.chips{display:flex;gap:6px;overflow-x:auto;padding-bottom:8px;margin:0 -12px 6px;padding-left:12px;padding-right:12px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:none;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:999px;padding:7px 12px;font:inherit;font-weight:600;white-space:nowrap}
+.chip small{color:var(--muted);font-weight:500;margin-left:4px}
+.chip.on{background:var(--brand2);border-color:var(--brand2);color:#fff}
+.chip.on small{color:#e7f2fb}
+.seg{display:flex;background:var(--card);border:1px solid var(--line);border-radius:11px;padding:3px;margin:4px 0 12px}
+.seg button{flex:1;border:0;background:none;color:var(--muted);border-radius:8px;padding:8px;font:inherit;font-weight:600}
+.seg button.on{background:var(--brand2);color:#fff}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin-bottom:10px}
+.card h3{margin:0 0 8px;font-size:15px;display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+.card h3 em{font-style:normal;color:var(--muted);font-weight:500;font-size:13px}
+.nums{display:flex;flex-wrap:wrap;gap:6px}
+.v{border-radius:8px;padding:5px 9px;font-weight:600;font-size:14px;font-variant-numeric:tabular-nums;border:1px solid transparent}
+.v.vd{background:var(--day);color:var(--day-ink)}
+.v.vn{background:var(--night);color:var(--night-ink)}
+.v.vdn{background:linear-gradient(90deg,var(--day) 50%,var(--night) 50%);color:#fff;text-shadow:0 0 3px #000}
+.legend{display:flex;gap:12px;font-size:12px;color:var(--muted);margin:2px 2px 10px;flex-wrap:wrap}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:4px;vertical-align:-2px;margin-right:4px}
+.depgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.dep{text-align:left;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:14px;padding:12px;font:inherit}
+.dep b{display:block;font-size:16px}
+.dep span{color:var(--muted);font-size:13px}
+.dep .tot{font-size:24px;font-weight:700;color:var(--brand2);display:block;margin:2px 0}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{padding:8px 6px;border-bottom:1px solid var(--line);text-align:right;font-variant-numeric:tabular-nums}
+th:first-child,td:first-child{text-align:left}
+th{color:var(--muted);font-weight:600;font-size:12px}
+td.neg{color:var(--bad);font-weight:600}td.pos{color:var(--ok);font-weight:600}
+.empty{color:var(--muted);text-align:center;padding:30px 10px}
+.hit{display:flex;justify-content:space-between;gap:8px;padding:8px 0;border-bottom:1px solid var(--line)}
+.hit:last-child{border:0}
+.hit small{color:var(--muted)}
+.foot{color:var(--muted);font-size:12px;text-align:center;margin-top:16px}
+</style>
+</head>
+<body>
+<header>
+  <div class="row"><h1>Выход ТС</h1><div class="date" id="date">загрузка…</div></div>
+  <div class="kpis" id="kpis"></div>
+  <div class="tabs">
+    <button class="tab on" data-tab="deps">Отделы</button>
+    <button class="tab" data-tab="types">По типам</button>
+  </div>
+</header>
+<main id="app"><div class="empty">Загрузка сводки…</div></main>
+
+<script>
+(function(){
+  var DATA=null, tab='deps', dep=null, shift='all', q='';
+  var $=function(s){return document.querySelector(s)};
+  function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+  function store(k,v){try{if(v===undefined)return localStorage.getItem(k);localStorage.setItem(k,v)}catch(e){return null}}
+  function fmtDate(iso){var p=iso.split('-');return p[2]+'.'+p[1]+'.'+p[0]}
+
+  function load(){
+    fetch('data.json?'+Date.now(),{cache:'no-store'}).then(function(r){return r.json()}).then(function(d){
+      DATA=d;
+      var h=decodeURIComponent((location.hash||'').replace(/^#dep=/,''));
+      var saved=store('dep');
+      dep=h&&depList().some(function(x){return x.name===h})?h:(saved&&depList().some(function(x){return x.name===saved})?saved:null);
+      render();
+    }).catch(function(){
+      $('#app').innerHTML='<div class="empty">Не удалось загрузить данные.<br>Проверьте интернет и откройте снова.</div>';
+    });
+  }
+
+  function depList(){
+    var m={};
+    DATA.veh.forEach(function(v){
+      var o=m[v.dep]||(m[v.dep]={name:v.dep,d:0,n:0,cnt:0});
+      o.d+=v.d;o.n+=v.n;o.cnt++;
+    });
+    return Object.keys(m).map(function(k){return m[k]}).sort(function(a,b){return b.cnt-a.cnt||a.name.localeCompare(b.name)});
+  }
+
+  function header(){
+    var t=DATA.totals;
+    $('#date').textContent='на '+fmtDate(DATA.date);
+    $('#kpis').innerHTML=
+      '<div class="kpi"><b>'+t.plan+'</b><span>план</span></div>'+
+      '<div class="kpi"><b>'+t.fact+'</b><span>факт</span></div>'+
+      '<div class="kpi'+(t.diff<0?' neg':'')+'"><b>'+(t.diff>0?'+':'')+t.diff+'</b><span>откл.</span></div>'+
+      '<div class="kpi"><b>'+t.day+' / '+t.night+'</b><span>день / ночь</span></div>';
+  }
+
+  function numChip(v){
+    var cls=v.d&&v.n?'vdn':(v.d?'vd':'vn');
+    return '<span class="v '+cls+'">'+esc(v.num)+'</span>';
+  }
+  function legend(){
+    return '<div class="legend"><span><i style="background:var(--day)"></i>день</span><span><i style="background:var(--night)"></i>ночь</span><span><i style="background:linear-gradient(90deg,var(--day) 50%,var(--night) 50%)"></i>день и ночь</span></div>';
+  }
+
+  function viewDeps(){
+    var list=depList(), html='';
+    html+='<input class="search" id="q" type="search" inputmode="search" placeholder="Поиск по номеру или типу техники" value="'+esc(q)+'">';
+    if(q.trim()){return html+viewSearch(q.trim().toLowerCase());}
+    html+='<div class="chips">';
+    html+='<button class="chip'+(dep===null?' on':'')+'" data-dep="">Все</button>';
+    list.forEach(function(x){
+      html+='<button class="chip'+(dep===x.name?' on':'')+'" data-dep="'+esc(x.name)+'">'+esc(x.name)+'<small>'+x.cnt+'</small></button>';
+    });
+    html+='</div>';
+    if(dep===null){
+      html+='<div class="depgrid">';
+      list.forEach(function(x){
+        html+='<button class="dep" data-dep="'+esc(x.name)+'"><b>'+esc(x.name)+'</b><span class="tot">'+x.cnt+'</span><span>день '+x.d+' · ночь '+x.n+'</span></button>';
+      });
+      return html+'</div>';
+    }
+    var vs=DATA.veh.filter(function(v){return v.dep===dep});
+    var dcount=vs.filter(function(v){return v.d}).length, ncount=vs.filter(function(v){return v.n}).length;
+    html+='<div class="seg">'+
+      '<button data-shift="all" class="'+(shift==='all'?'on':'')+'">Все ('+vs.length+')</button>'+
+      '<button data-shift="d" class="'+(shift==='d'?'on':'')+'">День ('+dcount+')</button>'+
+      '<button data-shift="n" class="'+(shift==='n'?'on':'')+'">Ночь ('+ncount+')</button></div>';
+    var f=vs.filter(function(v){return shift==='all'||(shift==='d'?v.d:v.n)});
+    if(!f.length) return html+'<div class="empty">В этой смене техники нет</div>';
+    html+=legend();
+    var g={},order=[];
+    f.forEach(function(v){var k=v.p+'|'+v.t;if(!g[k]){g[k]={p:v.p,t:v.t,a:[]};order.push(k)}g[k].a.push(v)});
+    order.sort(function(a,b){return g[b].a.length-g[a].a.length});
+    order.forEach(function(k){
+      var x=g[k];
+      x.a.sort(function(a,b){return a.num.localeCompare(b.num,'ru',{numeric:true})});
+      html+='<div class="card"><h3>'+esc(x.t)+'<em>'+x.a.length+'</em></h3><div class="nums">'+x.a.map(numChip).join('')+'</div></div>';
+    });
+    return html;
+  }
+
+  function viewSearch(s){
+    var f=DATA.veh.filter(function(v){return (v.num+' '+v.t+' '+v.dep).toLowerCase().indexOf(s)>-1}).slice(0,80);
+    if(!f.length) return '<div class="empty">Ничего не найдено</div>';
+    var h='<div class="card">';
+    f.forEach(function(v){
+      var sh=v.d&&v.n?'день+ночь':(v.d?'день':'ночь');
+      h+='<div class="hit"><div><b>'+esc(v.num)+'</b><br><small>'+esc(v.t)+'</small></div><div style="text-align:right"><b>'+esc(v.dep)+'</b><br><small>'+sh+'</small></div></div>';
+    });
+    return h+'</div>';
+  }
+
+  function viewTypes(){
+    var h='<div class="card"><table><tr><th>Тип</th><th>План</th><th>Факт</th><th>Откл.</th><th>Д / Н</th></tr>';
+    DATA.types.slice().sort(function(a,b){return b.plan-a.plan}).forEach(function(t){
+      if(!t.plan&&!t.fact) return;
+      h+='<tr><td>'+esc(t.name)+'</td><td>'+t.plan+'</td><td>'+t.fact+'</td><td class="'+(t.diff<0?'neg':(t.diff>0?'pos':''))+'">'+(t.diff>0?'+':'')+t.diff+'</td><td>'+t.day+' / '+t.night+'</td></tr>';
+    });
+    var T=DATA.totals;
+    h+='<tr><td><b>Итого</b></td><td><b>'+T.plan+'</b></td><td><b>'+T.fact+'</b></td><td class="'+(T.diff<0?'neg':'pos')+'"><b>'+T.diff+'</b></td><td><b>'+T.day+' / '+T.night+'</b></td></tr></table></div>';
+    return h;
+  }
+
+  function render(){
+    header();
+    var keepQ=document.activeElement&&document.activeElement.id==='q';
+    $('#app').innerHTML=(tab==='deps'?viewDeps():viewTypes())+'<div class="foot">Данные диспетчерской сводки на '+fmtDate(DATA.date)+'</div>';
+    if(keepQ){var el=$('#q');el.focus();el.setSelectionRange(q.length,q.length)}
+  }
+
+  document.addEventListener('click',function(e){
+    var t=e.target.closest('[data-tab],[data-dep],[data-shift]'); if(!t||!DATA) return;
+    if(t.dataset.tab){
+      tab=t.dataset.tab;
+      document.querySelectorAll('.tab').forEach(function(b){b.classList.toggle('on',b.dataset.tab===tab)});
+    }else if(t.dataset.dep!==undefined){
+      dep=t.dataset.dep||null; shift='all'; q='';
+      store('dep',dep||'');
+      try{history.replaceState(null,'',dep?'#dep='+encodeURIComponent(dep):location.pathname)}catch(_){}
+      window.scrollTo(0,0);
+    }else if(t.dataset.shift){shift=t.dataset.shift}
+    render();
+  });
+  document.addEventListener('input',function(e){
+    if(e.target.id==='q'){q=e.target.value;render()}
+  });
+
+  if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').catch(function(){})}
+  load();
+})();
+</script>
+</body>
+</html>
